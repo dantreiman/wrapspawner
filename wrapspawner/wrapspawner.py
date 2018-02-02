@@ -154,7 +154,7 @@ class ProfilesSpawner(WrapSpawner):
     child_profile = Unicode()
 
     form_template = Unicode(
-        """<label for="profile">Select a job profile:</label>
+        """<label for="profile">Select profile:</label>
         <select class="form-control" name="profile" required autofocus>
         {input_template}
         </select>
