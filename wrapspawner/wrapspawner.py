@@ -73,6 +73,8 @@ class WrapSpawner(Spawner):
                 hub  = self.hub,
                 authenticator = self.authenticator,
                 config = self.config,
+                oauth_client_id = self.oauth_client_id,
+                server = self._server,
                 **self.child_config
                 )
             # initial state will always be wrong since it will see *our* state
@@ -208,7 +210,8 @@ class ProfilesSpawner(WrapSpawner):
         try:
             self.child_profile = state['profile']
         except KeyError:
-            raise KeyError('jupyterhub database might be outdated, please reset it, in the default configuration, just delete jupyterhub.sqlite')
+            self.child_profile = ''
+            #raise KeyError('jupyterhub database might be outdated, please reset it, in the default configuration, just delete jupyterhub.sqlite')
         self.select_profile(self.child_profile)
 
     def get_state(self):
