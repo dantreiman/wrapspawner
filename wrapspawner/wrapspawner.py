@@ -75,7 +75,6 @@ class WrapSpawner(Spawner):
                 oauth_client_id = self.oauth_client_id,
                 server = self._server,
                 config = self.config,
-                server = self._server,
                 **self.child_config
                 )
             # initial state will always be wrong since it will see *our* state
