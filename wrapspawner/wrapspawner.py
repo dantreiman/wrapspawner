@@ -72,6 +72,8 @@ class WrapSpawner(Spawner):
                 db   = self.db,
                 hub  = self.hub,
                 authenticator = self.authenticator,
+                oauth_client_id = self.oauth_client_id,
+                server = self._server,
                 config = self.config,
                 oauth_client_id = self.oauth_client_id,
                 server = self._server,
@@ -211,7 +213,6 @@ class ProfilesSpawner(WrapSpawner):
             self.child_profile = state['profile']
         except KeyError:
             self.child_profile = ''
-            #raise KeyError('jupyterhub database might be outdated, please reset it, in the default configuration, just delete jupyterhub.sqlite')
         self.select_profile(self.child_profile)
 
     def get_state(self):
