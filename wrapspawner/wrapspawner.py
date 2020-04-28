@@ -366,5 +366,13 @@ class SGEProfilesSpawner(ProfilesSpawner):
     def profiles(self):
         return self.default_profiles + self.get_host_profiles()
 
+    @property
+    def options_form(self):
+        # Required to dynamically update the options form.
+        temp_keys = [ dict(display=p[0], key=p[1], type=p[2], first='') for p in self.profiles]
+        temp_keys[0]['first'] = self.first_template
+        text = ''.join([ self.input_template.format(**tk) for tk in temp_keys ])
+        return self.form_template.format(input_template=text)
+
 # vim: set ai expandtab softtabstop=4:
 
