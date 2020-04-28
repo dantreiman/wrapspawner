@@ -23,6 +23,8 @@ selection of Spawner configurations.
 import os
 import json
 import re
+import subprocess
+import xml.etree.ElementTree
 import urllib.request
 
 from tornado import gen, concurrent
@@ -311,11 +313,56 @@ class SGEProfilesSpawner(ProfilesSpawner):
             The first three values will be exposed in the input_template as {display}, {key}, and {type}"""
         )
 
-    sge_host_profiles = lambda: []
+    def get_host_profiles(self):
+        QHOST_PATH = '/opt/sge6/bin/linux-x64/qhost'
+
+        ENV = dict(os.environ)
+        ENV['HOME'] = '/home/sgeadmin'
+        ENV['SGE_CELL'] = 'default'
+        ENV['SGE_EXECD_PORT'] = '63232'
+        ENV['SGE_QMASTER_PORT'] = '63231'
+        ENV['SGE_ROOT'] = '/opt/sge6'
+        ENV['SGE_CLUSTER_NAME'] = 'starcluster'
+
+        command = '{} -xml -q'.format(QHOST_PATH)
+        result_xml = subprocess.check_output([command], env=ENV, shell=True)
+        hosts_element = xml.etree.ElementTree.fromstring(result_xml)
+        node_profiles = []
+        for host_element in hosts_element:
+            if host_element.get('name') == 'global':
+                continue
+            name = host_element.get('name')
+            queues = []
+            for host_value in host_element:
+                if host_value.tag == 'queue':
+                    queue_name = host_value.get('name')
+                    slots = 0
+                    for qv in host_value:
+                        if qv.get('name') == 'slots':
+                            slots = int(qv.text)
+                    if slots > 0:
+                        queues.append(queue_name)
+            queue = 'cpu.q'
+            if 'mem.q' in queues:
+                queue = 'mem.q'
+            if 'gpu.q' in queues:
+                queue = 'gpu.q'
+            queue_type = queue.split('.')[0]
+            node_queue = '{}@{}'.format(queue, name)
+            node_profiles.append(
+                (u'{} ({})'.format(name, queue_type), u'{}_{}'.format(queue.replace('.', '_'), name.replace('.', '_')),
+                 'batchspawner.GridengineSpawner', dict(
+                    batch_submit_cmd='sudo -u {{username}} -E /opt/sge6/bin/linux-x64/qsub -q {}'.format(node_queue),
+                    batch_query_cmd='sudo -u {{username}} -E /opt/sge6/bin/linux-x64/qstat -q {} -xml'.format(
+                        node_queue),
+                    batch_cancel_cmd='sudo -u {username} -E /opt/sge6/bin/linux-x64/qdel {job_id}',
+                    hub_connect_ip=hub_ip_address))
+            )
+        return node_profiles
 
     @property
     def profiles(self):
-        return self.default_profiles + self.sge_host_profiles()
+        return self.default_profiles + self.get_host_profiles()
 
 # vim: set ai expandtab softtabstop=4:
 
