@@ -23,6 +23,7 @@ selection of Spawner configurations.
 import os
 import json
 import re
+import socket
 import subprocess
 import xml.etree.ElementTree
 import urllib.request
@@ -323,6 +324,8 @@ class SGEProfilesSpawner(ProfilesSpawner):
         ENV['SGE_QMASTER_PORT'] = '63231'
         ENV['SGE_ROOT'] = '/opt/sge6'
         ENV['SGE_CLUSTER_NAME'] = 'starcluster'
+
+        hub_ip_address = socket.gethostbyname(socket.gethostname())
 
         result_xml = subprocess.check_output([QHOST_PATH, '-xml', '-q'], env=ENV, shell=False)
         hosts_element = xml.etree.ElementTree.fromstring(result_xml)
