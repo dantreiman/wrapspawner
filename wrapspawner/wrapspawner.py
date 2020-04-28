@@ -325,7 +325,7 @@ class SGEProfilesSpawner(ProfilesSpawner):
         ENV['SGE_CLUSTER_NAME'] = 'starcluster'
 
         command = '{} -xml -q'.format(QHOST_PATH)
-        result_xml = subprocess.check_output([command], env=ENV, shell=True)
+        result_xml = subprocess.check_output([command], env=ENV, shell=False)
         hosts_element = xml.etree.ElementTree.fromstring(result_xml)
         node_profiles = []
         for host_element in hosts_element:
