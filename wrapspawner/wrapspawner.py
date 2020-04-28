@@ -293,5 +293,29 @@ class DockerProfilesSpawner(ProfilesSpawner):
         return self.form_template.format(input_template=text)
 
 
+class SGEProfilesSpawner(ProfilesSpawner):
+
+    """SGEProfilesSpawner - leverages ProfilesSpawner to dynamically create SGE spawner profiles
+         Due to the profiles being dynamic the "profiles" config item from the ProfilesSpawner is renamed as
+        "default_profiles".
+    """
+
+    default_profiles = List(
+        trait = Tuple( Unicode(), Unicode(), Type(Spawner), Dict() ),
+        default_value = [],
+        config = True,
+        help = """List of profiles to offer in addition to SGE hosts for selection. Signature is:
+            List(Tuple( Unicode, Unicode, Type(Spawner), Dict )) corresponding to
+            profile display name, unique key, Spawner class, dictionary of spawner config options.
+
+            The first three values will be exposed in the input_template as {display}, {key}, and {type}"""
+        )
+
+    sge_host_profiles = lambda: []
+
+    @property
+    def profiles(self):
+        return self.default_profiles + self.sge_host_profiles()
+
 # vim: set ai expandtab softtabstop=4:
 
