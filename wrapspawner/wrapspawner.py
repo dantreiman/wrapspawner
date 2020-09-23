@@ -77,6 +77,8 @@ class WrapSpawner(Spawner):
                 hub  = self.hub,
                 authenticator = self.authenticator,
                 oauth_client_id = self.oauth_client_id,
+                server_name = self.server_name,
+                name = self.name,
                 server = self._server,
                 config = self.config,
                 **self.child_config
@@ -223,7 +225,7 @@ class ProfilesSpawner(WrapSpawner):
                 break
 
     def construct_child(self):
-        self.child_profile = self.user_options.get('profile', "")
+        self.child_profile = self.user_options.get('profile', '')
         self.select_profile(self.child_profile)
         super().construct_child()
 
